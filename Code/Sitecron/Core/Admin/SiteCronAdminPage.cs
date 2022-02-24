@@ -15,8 +15,8 @@ namespace Sitecron.Core.Admin
 
         static SiteCronAdminPage()
         {
-        }
 
+        }
         public SiteCronAdminPage()
         {
             QuartzJobs = new List<QuartzJobDetail>();
@@ -32,26 +32,41 @@ namespace Sitecron.Core.Admin
             //GetExecutingJobs();
         }
 
+        //private void GetExecutingJobs()
+        //{
+        //    var scheduler = StdSchedulerFactory.GetDefaultScheduler();
+
+        //    var executingJobs = scheduler.GetCurrentlyExecutingJobs();
+        //    foreach (var job in executingJobs)
+        //    {
+        //        var newJob = new QuartzExecutingJobDetail();
+        //        newJob.JobName = job.JobDetail.JobDataMap.Get(SitecronConstants.ParamNames.Name).ToString();
+        //        newJob.RunTime = (DateTime.Now.ToUniversalTime() - ((DateTimeOffset)job.FireTimeUtc).DateTime).TotalMinutes.ToString();
+
+        //        this.QuartzExecutingJobs.Add(newJob);
+        //    }
+
+        //}
         private void GetJobs()
         {
             var scheduler = StdSchedulerFactory.GetDefaultScheduler();
-            IReadOnlyCollection<string> jobGroups = scheduler.Result.GetJobGroupNames().Result;
+            IList<string> jobGroups = scheduler.GetJobGroupNames();
 
             foreach (string group in jobGroups)
             {
                 var groupMatcher = GroupMatcher<JobKey>.GroupContains(group);
-                var jobKeys = scheduler.Result.GetJobKeys(groupMatcher).Result;
+                var jobKeys = scheduler.GetJobKeys(groupMatcher);
                 foreach (var jobKey in jobKeys)
                 {
-                    var detail = scheduler.Result.GetJobDetail(jobKey).Result;
-                    var triggers = scheduler.Result.GetTriggersOfJob(jobKey).Result;
+                    var detail = scheduler.GetJobDetail(jobKey);
+                    var triggers = scheduler.GetTriggersOfJob(jobKey);
                     foreach (ITrigger trigger in triggers)
                     {
                         var newJob = new QuartzJobDetail();
                         newJob.Group = group;
                         newJob.JobName = detail.JobDataMap.Get(SitecronConstants.ParamNames.Name).ToString();
                         newJob.Type = detail.JobType.ToString();
-                        newJob.State = scheduler.Result.GetTriggerState(trigger.Key).Result.ToString();
+                        newJob.State = scheduler.GetTriggerState(trigger.Key).ToString();
                         DateTimeOffset? nextFireTime = trigger.GetNextFireTimeUtc();
                         if (nextFireTime.HasValue)
                         {
@@ -69,7 +84,6 @@ namespace Sitecron.Core.Admin
         public string JobName { get; set; }
         public string RunTime { get; set; }
     }
-
     public class QuartzJobDetail
     {
         public string Group { get; set; }

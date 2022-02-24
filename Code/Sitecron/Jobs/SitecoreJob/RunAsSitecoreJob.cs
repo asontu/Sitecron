@@ -5,19 +5,18 @@ using Sitecron.Core.Jobs;
 using Sitecron.SitecronSettings;
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Sitecron.Jobs.SitecoreJob
 {
     public class RunAsSitecoreJob : IJob //Inherit from IJob interface from Quartz
     {
-        Task IJob.Execute(IJobExecutionContext context)
+        public void Execute(IJobExecutionContext context)
         {
             //simple type and method call without params
             try
             {
                 //get job parameters
-                JobDataMap dataMap = context.JobDetail.JobDataMap; //get the datamap from the Quartz job
+                JobDataMap dataMap = context.JobDetail.JobDataMap; //get the datamap from the Quartz job 
                 var job = (SitecronJob)dataMap[SitecronConstants.ParamNames.SitecronJob]; //get the SitecronJob from the job definition
                 if (job == null)
                     throw new Exception("Unable to load SiteCron Job Definition");
@@ -47,7 +46,6 @@ namespace Sitecron.Jobs.SitecoreJob
                 Log.Error("SiteCron: RunAsSitecoreJob: ERROR something went wrong - " + ex.Message, ex, this);
                 context.JobDetail.JobDataMap.Put(SitecronConstants.ParamNames.SitecronJobLogData, "Sitecron: RunAsSitecoreJob: ERROR something went wrong - " + ex.Message);
             }
-            return Task.FromResult<object>(null);
         }
     }
 }
