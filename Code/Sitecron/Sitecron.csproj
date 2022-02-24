@@ -53,6 +53,9 @@
     <Reference Include="Quartz, Version=2.6.2.0, Culture=neutral, PublicKeyToken=f6b8c98a402cc8a4, processorArchitecture=MSIL">
       <HintPath>..\packages\Quartz.2.6.2\lib\net40\Quartz.dll</HintPath>
     </Reference>
+    <Reference Include="Sitecore.Buckets, Version=8.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Sitecore.Buckets.10.1.0\lib\net48\Sitecore.Buckets.dll</HintPath>
+    </Reference>
     <Reference Include="Sitecore.Client, Version=16.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Sitecore.Client.10.1.0\lib\net48\Sitecore.Client.dll</HintPath>
     </Reference>
@@ -128,6 +131,7 @@
     <Compile Include="Core\Events\SitecronSavedHandler.cs" />
     <Compile Include="Demo\Jobs\DummyJob.cs" />
     <Compile Include="Extend\ISavedHandler.cs" />
+    <Compile Include="Jobs\CleanUpReports.cs" />
     <Compile Include="Jobs\HelloWorld.cs" />
     <Compile Include="Jobs\PowerShell\ExecuteScript.cs" />
     <Compile Include="Jobs\Publishing\SmartPublish.cs" />
