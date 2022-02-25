@@ -48,14 +48,21 @@ namespace Sitecron.Core
 
             foreach (var jobItem in autoFolderItems)
             {
-                using (new SecurityDisabler())
+                try
                 {
-                    using (new EditContext(jobItem))
+                    using (new SecurityDisabler())
                     {
+                        jobItem.Editing.BeginEdit();
                         jobItem[SitecronConstants.FieldNames.LastRunLog] += "Archived at startup.";
+                        jobItem.Editing.EndEdit();
+                        archive.ArchiveItem(jobItem);
+                        Log.Info(string.Format("SiteCron - Item Archived during startup. (ItemID: {0} DB: {1} Name:{2})", jobItem.ID.ToString(), contextDbName, jobItem.Name), this);
                     }
-                    archive.ArchiveItem(jobItem);
-                    Log.Info(string.Format("SiteCron - Item Archived during startup. (ItemID: {0} DB: {1} Name:{2})", jobItem.ID.ToString(), contextDbName, jobItem.Name), this);
+                }
+                catch (Exception)
+                {
+                    jobItem.Editing.CancelEdit();
+                    throw;
                 }
             }
         }

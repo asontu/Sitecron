@@ -4,6 +4,7 @@ using Sitecore.Data;
 using Sitecore.Data.Items;
 using Sitecore.Data.Managers;
 using Sitecore.Diagnostics;
+using Sitecore.SecurityModel;
 using Sitecore.Shell.Framework.Commands;
 using Sitecron.SitecronSettings;
 using System;
@@ -35,13 +36,24 @@ namespace Sitecron.Core.Commands
                     if (!Double.TryParse(Settings.GetSetting(SitecronConstants.SettingsNames.SiteCronExecuteNowSeconds), out addExecutionSeconds))
                         addExecutionSeconds = 20;
 
-                    using (new EditContext(newScriptItem, Sitecore.SecurityModel.SecurityCheck.Disable))
+                    DateTime executeTime = DateTime.Now.AddSeconds(addExecutionSeconds);
+
+                    try
                     {
-                        DateTime executeTime = DateTime.Now.AddSeconds(addExecutionSeconds);
-                        newScriptItem[SitecronConstants.FieldNames.CronExpression] = string.Format("{0} {1} {2} 1/1 * ? * ", executeTime.ToString("ss"), executeTime.ToString("mm"), executeTime.ToString("HH"));
-                        newScriptItem[SitecronConstants.FieldNames.ArchiveAfterExecution] = "1";
-                        newScriptItem[SitecronConstants.FieldNames.ExecuteExactlyAtDateTime] = "";
-                        newScriptItem[SitecronConstants.FieldNames.Disable] = "0";
+                        using (new SecurityDisabler())
+                        {
+                            newScriptItem.Editing.BeginEdit();
+                            newScriptItem[SitecronConstants.FieldNames.CronExpression] = string.Format("{0} {1} {2} 1/1 * ? * ", executeTime.ToString("ss"), executeTime.ToString("mm"), executeTime.ToString("HH"));
+                            newScriptItem[SitecronConstants.FieldNames.ArchiveAfterExecution] = "1";
+                            newScriptItem[SitecronConstants.FieldNames.ExecuteExactlyAtDateTime] = "";
+                            newScriptItem[SitecronConstants.FieldNames.Disable] = "0";
+                            newScriptItem.Editing.EndEdit();
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        newScriptItem.Editing.CancelEdit();
+                        throw;
                     }
                 }
             }
